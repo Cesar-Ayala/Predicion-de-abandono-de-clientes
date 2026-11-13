@@ -1,8 +1,3 @@
-"""App de Streamlit — Predicción de permanencia (Churn) de clientes Telco.
-
-Usa los 3 mejores modelos entrenados en el notebook (ver entrenar_modelos.py).
-Ejecutar:  streamlit run app.py
-"""
 from pathlib import Path
 
 import joblib
@@ -21,9 +16,7 @@ ROJO, VERDE, AZUL, NARANJA = "#D1495B", "#4C9F70", "#00798C", "#EDAE49"
 
 st.set_page_config(page_title="Permanencia de clientes · Telco", page_icon="📞", layout="wide")
 
-# ----------------------------------------------------------------------------
-# Carga de recursos (se cachean para que no se recarguen en cada interacción)
-# ----------------------------------------------------------------------------
+
 @st.cache_resource
 def cargar_modelos():
     return joblib.load(BASE / "modelos" / "modelos_churn.joblib")
@@ -46,7 +39,6 @@ B, EV, DF = cargar_modelos(), cargar_eval(), cargar_datos()
 MODELOS = B["top"]
 TASA_BASE = DF["Abandono"].mean()
 
-# Traducciones para mostrar al usuario
 TRAD = {"Yes": "Sí", "No": "No", "Female": "Mujer", "Male": "Hombre",
         "Month-to-month": "Mes a mes", "One year": "1 año", "Two year": "2 años",
         "DSL": "DSL", "Fiber optic": "Fibra óptica",
@@ -72,9 +64,7 @@ NOMBRE_VAR = {
 }
 
 
-# ----------------------------------------------------------------------------
-# Funciones de predicción
-# ----------------------------------------------------------------------------
+
 def predecir(df_crudo: pd.DataFrame) -> pd.DataFrame:
     """Probabilidad de ABANDONO por modelo (calibrada) + promedio de consenso."""
     X = escalar(a_features(df_crudo), B["scaler"])
@@ -104,9 +94,7 @@ def estilo_plotly(fig, alto=380):
     return fig
 
 
-# ----------------------------------------------------------------------------
-# Barra lateral
-# ----------------------------------------------------------------------------
+
 with st.sidebar:
     st.title("📞 Churn Telco")
     st.caption("Predicción de la probabilidad de que un cliente **permanezca** con el servicio.")
@@ -128,9 +116,7 @@ st.title("Predicción de permanencia de clientes")
 tab1, tab2, tab3, tab4 = st.tabs(["🔮 Cliente individual", "📂 Carga masiva (CSV)",
                                   "📊 Análisis del dataset", "🏆 Desempeño de modelos"])
 
-# ============================================================================
-# TAB 1 · CLIENTE INDIVIDUAL
-# ============================================================================
+
 with tab1:
     st.subheader("Datos del cliente")
     si_no = ["No", "Yes"]
@@ -167,7 +153,6 @@ with tab1:
                                                "Bank transfer (automatic)", "Credit card (automatic)"],
                             format_func=t)
 
-    # Los servicios dependientes quedan en "No" cuando no aplican (igual que en el notebook)
     forzar = lambda v, cond: "No" if cond else v
     cliente = pd.DataFrame([{
         "gender": gender, "SeniorCitizen": senior, "Partner": partner, "Dependents": dependents,
@@ -225,7 +210,6 @@ with tab1:
             st.warning(f"Los modelos discrepan ({spread * 100:.0f} puntos de diferencia): "
                        "conviene tratar este caso con cautela.")
 
-    # --- ¿Por qué? Contribución de cada variable (regresión logística) -------------
     st.subheader("¿Qué factores influyen en este cliente?")
     a, b = st.columns(2)
     with a:
@@ -287,9 +271,7 @@ with tab1:
             st.markdown("**Acciones de retención sugeridas**")
             st.markdown("\n".join(f"- {x}" for x in acciones[:4]))
 
-# ============================================================================
-# TAB 2 · CARGA MASIVA
-# ============================================================================
+
 with tab2:
     st.subheader("Predicción para muchos clientes")
     st.write("Sube un CSV con el **mismo formato del dataset original** (columnas: gender, "
@@ -403,9 +385,7 @@ with tab2:
             st.download_button("⬇️ Descargar resultados (CSV)", salida.to_csv(index=False).encode(),
                                "predicciones_churn.csv", "text/csv")
 
-# ============================================================================
-# TAB 3 · ANÁLISIS DEL DATASET
-# ============================================================================
+
 with tab3:
     st.subheader("Panorama de los clientes")
     perdidos = DF.loc[DF["Abandono"] == 1, "MonthlyCharges"].sum()
@@ -501,9 +481,7 @@ with tab3:
         f"- La **fibra óptica** tiene una tasa de abandono de **{r_fib:.0%}**, la más alta entre los tipos de internet.\n"
         f"- Pagar con **cheque electrónico** se asocia con **{r_chk:.0%}** de abandono.")
 
-# ============================================================================
-# TAB 4 · DESEMPEÑO DE MODELOS
-# ============================================================================
+
 with tab4:
     st.subheader("Los 3 mejores modelos sobre el conjunto de prueba (1.409 clientes)")
     y_test = EV["y_test"]

@@ -1,8 +1,3 @@
-"""Preprocesamiento compartido entre el entrenamiento y la app de Streamlit.
-
-Replica EXACTAMENTE las transformaciones del notebook (secciones 4 y 5), de modo
-que un cliente nuevo se transforme igual que los datos con los que se entrenó.
-"""
 import numpy as np
 import pandas as pd
 
@@ -12,7 +7,6 @@ COLS_INTERNET = ["OnlineSecurity", "OnlineBackup", "DeviceProtection",
 COLS_BINARIAS = ["Partner", "Dependents", "PhoneService", "MultipleLines",
                  "PaperlessBilling"] + COLS_INTERNET
 
-# Orden exacto de columnas de X (idéntico al notebook)
 COLUMNAS_X = [
     "gender", "SeniorCitizen", "Partner", "Dependents", "tenure", "PhoneService",
     "MultipleLines", "OnlineSecurity", "OnlineBackup", "DeviceProtection",
